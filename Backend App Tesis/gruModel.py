@@ -1,8 +1,3 @@
-import os
-for dirname, _, filenames in os.walk('/kaggle/input'):
-    for filename in filenames:
-        print(os.path.join(dirname, filename))
-
 # for DL modeling
 import torch
 import torch.nn as nn
@@ -28,7 +23,7 @@ import seaborn as sns
 from datetime import datetime
 
 class ImprovedGRUModel(nn.Module):
-    def __init__(self, inputSize, hiddenSize = 16, numLayers=2, dropout=0.2):
+    def __init__(self, inputSize = 3, hiddenSize = 16, numLayers=2, dropout=0.2):
         super().__init__()
         
         self.hiddenSize = hiddenSize
