@@ -41,15 +41,17 @@ model.eval()
 @app.post('/predict')
 def predict(file: UploadFile):
     # Preprocess the data
-    X = preprocess(file.file)
+    X, customerIDs = preprocess(file.file)
     
     # Convert to torch tensor
-    X_tensor = torch.tensor(X, dtype=torch.float32)
+    XTensor = torch.tensor(X, dtype=torch.float32)
     
     # Make predictions
     with torch.no_grad():
-        predictions = model(X_tensor).cpu().numpy()
+        predictions = model(XTensor).cpu().numpy()
+
+    # Results
+    results = [{'CustomerID': int(custID), 'Prediction': float(pred)} for custID, pred in zip(customerIDs, predictions.squeeze())]
     
     # Return predictions as a list
-    return {'predictions': predictions.tolist()}
-
+    return {'predictions': results}
