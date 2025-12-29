@@ -111,8 +111,6 @@ def preprocess(df):
     # Number of Features (inputs)
     nFeatures = len(seqFeatureCols)
 
-    # We have to make sure the order is correct, missing months = 0 and the shape of X is correct
-
     # Tensor Init
     X_seq = np.zeros((nClients, nTimesteps, nFeatures), dtype=np.float32)
 
@@ -145,4 +143,4 @@ def preprocess(df):
 
     X_seq = scaleSequenceData(X_seq, scaler)
 
-    return X_seq
+    return X_seq, customers
