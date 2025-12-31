@@ -95,6 +95,72 @@ const App = () => {
     }
   };
 
+  const handleExportHigh = async () => {
+    try {
+      const response = await fetch(`${API_URL}/exportHigh`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'HighValueCustomers.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting:', error);
+      alert('Error exporting file');
+    }
+  };
+
+  const handleExportMedium = async () => {
+    try {
+      const response = await fetch(`${API_URL}/exportMedium`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'MediumValueCustomers.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting:', error);
+      alert('Error exporting file');
+    }
+  };
+
+  const handleExportLow = async () => {
+    try {
+      const response = await fetch(`${API_URL}/exportLow`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'LowValueCustomers.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting:', error);
+      alert('Error exporting file');
+    }
+  };
+
+  const [topN, setTopN] = useState(10);
+
+  const handleTopNChange = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/topCustomers?topN=${topN}`);
+      const data = await response.json();
+      setTopCustomers(data);
+    } catch (error) {
+      console.error('Error fetching top customers:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -249,48 +315,65 @@ const App = () => {
 
             {/* Top Customers */}
             {topCustomers && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-gray-800">Top 10 Customers</h3>
-                  <button
-                    onClick={handleExport}
-                    className="bg-yellow-400 text-red-700 py-2 px-4 rounded-lg font-semibold hover:bg-yellow-500 transition-colors flex items-center shadow-md"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Export CSV
-                  </button>
-                </div>
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <h3 className="text-xl font-bold text-gray-800">Top Customers</h3>
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        defaultValue="10"
+                        value={topN}
+                        onChange={(e) => setTopN(e.target.value)}
+                        className="w-20 px-2 py-1 border border-gray-300 rounded"
+                      />
+                      <button
+                        onClick={handleTopNChange}
+                        className="bg-yellow-400 text-red-700 px-3 py-1 rounded hover:bg-yellow-500 transition-colors text-sm font-semibold"
+                      >
+                        Update
+                      </button>
+                    </div>
+                    <button
+                      onClick={handleExport}
+                      className="bg-yellow-400 text-red-700 py-2 px-4 rounded-lg font-semibold hover:bg-yellow-500 transition-colors flex items-center shadow-md"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Export CSV
+                    </button>
+                  </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b-2 border-gray-200">
-                        <th className="text-left py-3 px-4 text-gray-600 font-semibold">Rank</th>
-                        <th className="text-left py-3 px-4 text-gray-600 font-semibold">Customer ID</th>
-                        <th className="text-left py-3 px-4 text-gray-600 font-semibold">Predicted Value</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {topCustomers.map((customer, index) => (
-                        <tr key={customer.CustomerID} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="py-3 px-4">
-                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-700 font-bold">
-                              {index + 1}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 font-medium text-gray-800">{customer.CustomerID}</td>
-                          <td className="py-3 px-4">
-                            <span className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold">
-                              {customer.Prediction.toFixed(1) + ' £'}
-                            </span>
-                          </td>
+                  <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+                    <table className="w-full">
+                      <thead className="sticky top-0 bg-white">
+                        <tr className="border-b-2 border-gray-200">
+                          <th className="text-left py-3 px-4 text-gray-600 font-semibold">Rank</th>
+                          <th className="text-left py-3 px-4 text-gray-600 font-semibold">Customer ID</th>
+                          <th className="text-left py-3 px-4 text-gray-600 font-semibold">Predicted Value</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {topCustomers.map((customer, index) => (
+                          <tr key={customer.CustomerID} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="py-3 px-4">
+                              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-700 font-bold">
+                                {index + 1}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 font-medium text-gray-800">{customer.CustomerID}</td>
+                            <td className="py-3 px-4">
+                              <span className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold">
+                                {customer.Prediction.toFixed(1) + ' £'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         )}
 
@@ -318,6 +401,13 @@ const App = () => {
                   <p className="text-xs text-gray-600 mt-2">
                     {((segmentation.segmentation.high_value.count / metrics.count) * 100).toFixed(1)}% of total
                   </p>
+                  <button
+                    onClick={handleExportHigh}
+                    className="mt-4 ml-auto bg-yellow-400 text-red-700 py-2 px-4 rounded-lg font-semibold hover:bg-yellow-500 transition-colors flex items-center shadow-md"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV
+                  </button>
                 </div>
 
                 {/* Medium Value */}
@@ -337,6 +427,13 @@ const App = () => {
                   <p className="text-xs text-gray-600 mt-2">
                     {((segmentation.segmentation.medium_value.count / metrics.count) * 100).toFixed(1)}% of total
                   </p>
+                  <button
+                    onClick={handleExportMedium}
+                    className="mt-4 ml-auto bg-yellow-400 text-red-700 py-2 px-4 rounded-lg font-semibold hover:bg-yellow-500 transition-colors flex items-center shadow-md"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV
+                  </button>
                 </div>
 
                 {/* Low Value */}
@@ -356,6 +453,13 @@ const App = () => {
                   <p className="text-xs text-gray-600 mt-2">
                     {((segmentation.segmentation.low_value.count / metrics.count) * 100).toFixed(1)}% of total
                   </p>
+                  <button
+                    onClick={handleExportLow}
+                    className="mt-4 ml-auto bg-yellow-400 text-red-700 py-2 px-4 rounded-lg font-semibold hover:bg-yellow-500 transition-colors flex items-center shadow-md"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV
+                  </button>
                 </div>
               </div>
 
